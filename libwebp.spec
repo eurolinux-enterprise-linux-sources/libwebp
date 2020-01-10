@@ -1,7 +1,7 @@
 %global _hardened_build 1
 Name:		libwebp
 Version:	0.3.0
-Release:	7%{?dist}
+Release:	3%{?dist}
 Group:		Development/Libraries
 URL:		http://webmproject.org/
 Summary:	Library and tools for the WebP graphics format
@@ -9,8 +9,6 @@ Summary:	Library and tools for the WebP graphics format
 License:	BSD
 Source0:	http://webp.googlecode.com/files/%{name}-%{version}.tar.gz
 Source1:	libwebp_jni_example.java	
-Patch0:		libwebp-0.3.0-endian-check.patch
-Patch1:		libwebp-0.3.0-endian-check2.patch
 BuildRequires:	libjpeg-devel libpng-devel libtool swig 
 BuildRequires:  giflib-devel
 BuildRequires:  libtiff-devel
@@ -27,7 +25,6 @@ images more efficiently.
 %package tools
 Group:		Development/Tools
 Summary:	The WebP command line tools
-Requires:	%{name}%{?_isa} = %{version}-%{release}
 
 %description tools
 WebP is an image format that does lossy compression of digital
@@ -60,8 +57,6 @@ Java bindings for libwebp.
 
 %prep
 %setup -q
-%patch0 -p1 -b .endian
-%patch1 -p1 -b .endian2
 
 %build
 mkdir -p m4
@@ -124,19 +119,6 @@ cp swig/*.jar swig/*.so %{buildroot}/%{_libdir}/%{name}-java/
 %{_libdir}/%{name}-java/
 
 %changelog
-* Tue Feb 21 2017 Martin Stransky <stransky@redhat.com> - 0.3.0-7
-- Added libwebp dependency to libwebp-tools
-
-* Tue Feb 21 2017 Martin Stransky <stransky@redhat.com> - 0.3.0-6
-- Rebuilt
-
-* Mon Oct 13 2014 Jaromir Capik <jcapik@redhat.com> - 0.3.0-5
-- Removing __PPC__ macro conflicting with __BYTE_ORDER__ endian check (#1127230)
-- Resolves: rhbz#1127230
-
-* Mon Aug 18 2014 Peter Robinson <pbrobinson@redhat.com> 0.3.0-4
-- Fix ppc64le build
-
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 0.3.0-3
 - Mass rebuild 2014-01-24
 
