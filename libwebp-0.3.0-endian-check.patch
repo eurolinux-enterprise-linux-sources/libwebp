@@ -1,0 +1,73 @@
+--- libwebp-0.3.0/examples/tiffdec.c.orig	2013-03-29 22:55:16.000000000 +0000
++++ libwebp-0.3.0/examples/tiffdec.c	2014-08-19 00:06:28.972859672 +0100
+@@ -95,7 +95,7 @@
+       pic->width = width;
+       pic->height = height;
+       // TIFF data is ABGR
+-#ifdef __BIG_ENDIAN__
++#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+       TIFFSwabArrayOfLong(raster, width * height);
+ #endif
+       ok = keep_alpha
+--- libwebp-0.3.0/src/dec/vp8.c.orig	2013-03-29 22:55:16.000000000 +0000
++++ libwebp-0.3.0/src/dec/vp8.c	2014-08-19 00:06:28.972859672 +0100
+@@ -540,7 +540,7 @@
+ 
+ // Macro to pack four LSB of four bytes into four bits.
+ #if defined(__PPC__) || defined(_M_PPC) || defined(_ARCH_PPC) || \
+-    defined(__BIG_ENDIAN__)
++    (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+ #define PACK_CST 0x08040201U
+ #else
+ #define PACK_CST 0x01020408U
+--- libwebp-0.3.0/src/dsp/lossless.c.orig	2014-08-19 00:06:28.973859689 +0100
++++ libwebp-0.3.0/src/dsp/lossless.c	2014-08-19 00:09:58.349573103 +0100
+@@ -1255,7 +1255,7 @@
+       uint32_t argb = *src++;
+ 
+ #if !defined(WEBP_REFERENCE_IMPLEMENTATION)
+-#if !defined(__BIG_ENDIAN__) && (defined(__i386__) || defined(__x86_64__))
++#if (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) && (defined(__i386__) || defined(__x86_64__))
+       __asm__ volatile("bswap %0" : "=r"(argb) : "0"(argb));
+       *(uint32_t*)dst = argb;
+ #elif !defined(__BIG_ENDIAN__) && defined(_MSC_VER)
+--- libwebp-0.3.0/src/utils/bit_reader.h.orig	2013-03-29 22:55:16.000000000 +0000
++++ libwebp-0.3.0/src/utils/bit_reader.h	2014-08-19 00:06:28.973859689 +0100
+@@ -155,7 +155,7 @@
+     bit_t bits;
+     lbit_t in_bits = *(lbit_t*)br->buf_;
+     br->buf_ += (BITS) >> 3;
+-#if !defined(__BIG_ENDIAN__)
++#if (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+ #if (BITS > 32)
+ // gcc 4.3 has builtin functions for swap32/swap64
+ #if defined(__GNUC__) && \
+@@ -192,7 +192,7 @@
+ #else   // BITS == 8
+     bits = (bit_t)in_bits;
+ #endif
+-#else    // BIG_ENDIAN
++#else    // __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+     bits = (bit_t)in_bits;
+ #endif
+ #ifndef USE_RIGHT_JUSTIFY
+--- libwebp-0.3.0/src/utils/bit_writer.c.orig	2013-03-29 22:55:16.000000000 +0000
++++ libwebp-0.3.0/src/utils/bit_writer.c	2014-08-19 00:06:28.973859689 +0100
+@@ -236,7 +236,7 @@
+ 
+ void VP8LWriteBits(VP8LBitWriter* const bw, int n_bits, uint32_t bits) {
+   if (n_bits < 1) return;
+-#if !defined(__BIG_ENDIAN__)
++#if (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+   // Technically, this branch of the code can write up to 25 bits at a time,
+   // but in prefix encoding, the maximum number of bits written is 18 at a time.
+   {
+@@ -246,7 +246,7 @@
+     *(uint32_t*)p = v;
+     bw->bit_pos_ += n_bits;
+   }
+-#else  // BIG_ENDIAN
++#else  // __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+   {
+     uint8_t* p = &bw->buf_[bw->bit_pos_ >> 3];
+     const int bits_reserved_in_first_byte = bw->bit_pos_ & 7;
